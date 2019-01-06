@@ -1,17 +1,17 @@
 {
-  "name": "live-video-streaming-service-web-client",
+  "name": "s3m-web-client",
   "version": "0.0.1",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/blacknred/live-video-streaming-service.git"
+    "url": "git+https://github.com/blacknred/s3m-web-client.git"
   },
   "author": "tretyakov.dmi@gmail.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/blacknred/live-video-streaming-service/issues"
+    "url": "https://github.com/blacknred/s3m-web-client/issues"
   },
-  "homepage": "https://github.com/blacknred/live-video-streaming-service#readme",
+  "homepage": "https://github.com/blacknred/s3m-web-client#readme",
   "scripts": {
     "start": "react-scripts start",
     "build": "REACT_APP_PORT=3000 react-scripts build",
