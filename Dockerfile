@@ -10,8 +10,9 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 # install and cache app dependencies
 ADD package.json /usr/src/app/package.json
 
-VOLUME . /usr/src/app
-VOLUME /usr/src/app/node_modules
+COPY . /usr/src/app
+
+VOLUME ["/usr/src/app", "/usr/src/app/node_modules"]
 
 RUN yarn install
 RUN yarn global add react-scripts@1.1.5
@@ -22,5 +23,5 @@ EXPOSE 3000
 CMD ["yarn", "start"]
 
 # docker build -t s3m-web-client .
-# docker run -it -p 3000:3000 --rm s3m-web-client
+# docker run -it -p 3000:3000 s3m-web-client
 
