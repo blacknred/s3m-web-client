@@ -25,6 +25,7 @@ const styles = theme => ({
         overflow: 'hidden',
         width: '100%',
         margin: 0,
+        // transition: 'background-color 500ms ease-out',
         [theme.breakpoints.only('xs')]: {
             flexDirection: 'column',
         },
@@ -86,7 +87,7 @@ const styles = theme => ({
 
 const Broadcast = ({
     classes, width, isMyStream, isStatsOn, videoCodec, Chat, NewMessage,
-    videoTarget, statsTarget, onChange, onLike, onStop, onSwitch,
+    videoTarget, statsTarget, rootTarget, onChange, onLike, onStop, onSwitch,
 }) => {
     const stats = (
         <div className={classes.stats}>
@@ -127,87 +128,89 @@ const Broadcast = ({
     );
 
     return (
-        <Grid container className={classes.root}>
-            {isStatsOn && stats}
-            <Grid item xs className={classes.options}>
-                <Grid
-                    container
-                    justify="space-between"
-                    alignItems="flex-start"
-                    direction="column"
-                >
-                    <Typography
-                        variant="h4"
-                        color="textSecondary"
-                        className={classes.title}
-                        children={process.env.REACT_APP_WEBSITE_NAME.split('-')[0]}
-                    />
+        <div ref={rootTarget}>
+            <Grid container className={classes.root}>
+                {isStatsOn && stats}
+                <Grid item xs className={classes.options}>
                     <Grid
                         container
+                        justify="space-between"
+                        alignItems="flex-start"
                         direction="column"
-                        className={classes.actions}
                     >
-                        {isMyStream && (
-                            <Fab
-                                color="primary"
-                                size={width === 'xs' ? 'medium' : 'large'}
-                                onClick={onLike}
-                            >
-                                <Favorite />
-                            </Fab>
-                        )}
-                        <Fab
-                            to="/"
-                            component={Link}
-                            color="secondary"
-                            size={width === 'xs' ? 'medium' : 'large'}
-                            variant={width === 'xs' ? 'round' : 'extended'}
-                            onClick={onStop}
-                        >
-                            {isMyStream ? <VideocamOff /> : <Cancel />}
-                            {width !== 'xs' && (
-                                <span>
-                                    &nbsp;
-                                    {isMyStream ? 'Turn off' : 'Leave'}
-                                </span>
-                            )}
-                        </Fab>
-                        <FormControlLabel
-                            label="Peer statistics"
-                            control={(
-                                <Switch
-                                    checked={isStatsOn}
-                                    onChange={onSwitch('isStatsOn')}
-                                    // value="checkedA"
-                                />
-                            )}
+                        <Typography
+                            variant="h4"
+                            color="textSecondary"
+                            className={classes.title}
+                            children={process.env.REACT_APP_WEBSITE_NAME.split('-')[0]}
                         />
+                        <Grid
+                            container
+                            direction="column"
+                            className={classes.actions}
+                        >
+                            {isMyStream && (
+                                <Fab
+                                    color="primary"
+                                    size={width === 'xs' ? 'medium' : 'large'}
+                                    onClick={onLike}
+                                >
+                                    <Favorite />
+                                </Fab>
+                            )}
+                            <Fab
+                                to="/"
+                                component={Link}
+                                color="secondary"
+                                size={width === 'xs' ? 'medium' : 'large'}
+                                variant={width === 'xs' ? 'round' : 'extended'}
+                                onClick={onStop}
+                            >
+                                {isMyStream ? <VideocamOff /> : <Cancel />}
+                                {width !== 'xs' && (
+                                    <span>
+                                        &nbsp;
+                                        {isMyStream ? 'Turn off' : 'Leave'}
+                                    </span>
+                                )}
+                            </Fab>
+                            <FormControlLabel
+                                label="Peer statistics"
+                                control={(
+                                    <Switch
+                                        checked={isStatsOn}
+                                        onChange={onSwitch('isStatsOn')}
+                                    // value="checkedA"
+                                    />
+                                )}
+                            />
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6} className={classes.preview}>
+                    <video
+                        controls
+                        loop
+                        ref={videoTarget}
+                        width="100%"
+                        height="100%"
+                    >
+                        <track default kind="captions" src="" />
+                    </video>
+                </Grid>
+                <Grid item xs className={classes.chat}>
+                    <Grid
+                        container
+                        justify="space-between"
+                        alignItems="flex-end"
+                        direction="column"
+                    >
+                        {Chat}
+                        {NewMessage}
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid item xs={12} lg={4} sm={6} className={classes.preview}>
-                <video
-                    controls
-                    loop
-                    ref={videoTarget}
-                    width="100%"
-                    height="100%"
-                >
-                    <track default kind="captions" src="" />
-                </video>
-            </Grid>
-            <Grid item xs className={classes.chat}>
-                <Grid
-                    container
-                    justify="space-between"
-                    alignItems="flex-end"
-                    direction="column"
-                >
-                    {Chat}
-                    {NewMessage}
-                </Grid>
-            </Grid>
-        </Grid>
+        </div>
     );
 };
 
@@ -219,6 +222,7 @@ Broadcast.propTypes = {
     isStatsOn: PropTypes.bool.isRequired,
     videoTarget: PropTypes.shape().isRequired,
     statsTarget: PropTypes.shape().isRequired,
+    rootTarget: PropTypes.shape().isRequired,
     onSwitch: PropTypes.func.isRequired,
     onLike: PropTypes.func.isRequired,
     onStop: PropTypes.func.isRequired,

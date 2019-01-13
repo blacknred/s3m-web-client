@@ -15,7 +15,6 @@ const ENTER_KEY = 13;
 
 const styles = theme => ({
     messageForm: {
-        height: 50,
         borderRadius: 50,
         minWidth: '75%',
         backgroundColor: theme.palette.background.paper,
