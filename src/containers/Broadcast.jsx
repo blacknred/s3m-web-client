@@ -1,24 +1,30 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+import Chat from './Chat';
+import NewMessage from './NewMessage';
 import BroadcastComponent from '../components/Broadcast';
 
 import {
     getOrSetBroadcast,
     viewersUpdated,
     handleStream,
+    enableStats,
+    changeVideoCodec,
 } from '../signalingClient';
 
-class Broadcast extends React.Component {
+class Broadcast extends PureComponent {
     constructor(props) {
         super(props);
         this.videoRef = React.createRef();
+        this.statsRef = React.createRef();
         this.state = {
-            broken: false,
+            isBroken: false,
             isMyStream: true,
+            isStatsOn: false,
+            videoCodec: 'VP9',
             viewersCount: 0,
-            text: '',
-            messages: [],
+            broadcastId: null,
         };
     }
 
@@ -26,8 +32,11 @@ class Broadcast extends React.Component {
         const { match: { params: { broadcastId } } } = this.props;
 
         /* handle broadcasting */
-        getOrSetBroadcast(broadcastId, (isBroadcastExists) => {
-            this.setState({ isMyStream: !isBroadcastExists });
+        getOrSetBroadcast(broadcastId, (realId, isBroadcastExists) => {
+            this.setState({
+                broadcastId: realId,
+                isMyStream: !isBroadcastExists,
+            });
         });
 
         viewersUpdated((event) => {
@@ -47,90 +56,66 @@ class Broadcast extends React.Component {
                 }),
             }));
         });
-
-        handleStream(this.videoRef.current);
-
-        /* handle chat */
-        this.chatFetchingHandler();
     }
 
-    chatFetchingHandler = () => {
-        // fake fetching
-        const messages = [
-            {
-                id: 1,
-                avatar: null,
-                author: 'Queen',
-                message: 'harum mollitia consectetur perspiciatis. Recusandae!',
-                event: true,
-            },
-            {
-                id: 2,
-                avatar: null,
-                author: 'Van',
-                message: ', maxime alias temporibus aspernatur numquam',
-                event: false,
-            },
-            {
-                id: 3,
-                avatar: null,
-                author: 'Mike',
-                message: 'Itaque dolor aut dolorem eligendi nobis totam earum iste',
-                event: true,
-            },
-            {
-                id: 4,
-                avatar: null,
-                author: 'Leo',
-                message: 'Ipsam corrupti doloremque',
-                event: false,
-            },
-            {
-                id: 5,
-                avatar: null,
-                author: 'Kate',
-                message: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit.',
-                event: false,
-            },
-        ];
-        this.setState({ messages });
+    componentDidUpdate() {
+        setTimeout(handleStream(this.videoRef.current), 7000);
     }
 
-    onStopHandler = () => { }
+    onSwitchHandler = name => (event) => {
+        this.setState({ [name]: event.target.checked });
+        if (name === 'isStatsOn') {
+            this.statsHandler(event.target.checked);
+        }
+    };
 
-    onLikeHandler = () => { this.setState({ broken: true }); }
+    statsHandler = (status) => {
+        enableStats(status, (statsData) => {
+            if (!this.statsRef.current) {
+                return;
+            }
+            const stats = Object.keys(statsData).reduce((prev, cur) =>
+                `${prev} <p>${cur.toUpperCase()}: ${statsData[cur]}</p>`, '');
+            this.statsRef.current.innerHTML = stats;
+        });
+    }
 
-    onTextChangeHandler = ({ target: { name, value } }) => {
+    onStopHandler = () => {}
+
+    onLikeHandler = () => {}
+
+    onChangeHandler = ({ target: { name, value } }) => {
         this.setState({ [name]: value });
-    }
-
-    onMessageSubmitHandler = () => {
-        this.setState(({ text, messages }) => ({
-            text: '',
-            messages: [
-                {
-                    id: messages.length + 1,
-                    avatar: null,
-                    author: 'Leo',
-                    message: text,
-                    event: false,
-                },
-                ...messages,
-            ],
-        }));
+        if (name === 'videoCodec') {
+            changeVideoCodec(value);
+        }
     }
 
     render() {
-        const { broken } = this.state;
-        if (broken) throw new Error('Broadcast not found!');
+        const {
+            isBroken, broadcastId, viewersCount, isMyStream, ...rest
+        } = this.state;
+        if (isBroken) throw new Error('Broadcast not found!');
         return (
             <BroadcastComponent
-                {...this.state}
+                {...rest}
                 videoTarget={this.videoRef}
-                onTextChange={this.onTextChangeHandler}
-                onMessageSubmit={this.onMessageSubmitHandler}
+                statsTarget={this.statsRef}
+                isMyStream={isMyStream}
+                onChange={this.onChangeHandler}
+                onSwitch={this.onSwitchHandler}
                 onLike={this.onLikeHandler}
                 onStop={this.onStopHandler}
+                Chat={
+                    broadcastId && <Chat broadcastId={broadcastId} />
+                }
+                NewMessage={(
+                    <NewMessage
+                        broadcastId={broadcastId}
+                        viewersCount={viewersCount}
+                        isMyStream={isMyStream}
+                    />
+                )}
             />
         );
     }

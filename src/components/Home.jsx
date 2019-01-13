@@ -33,7 +33,7 @@ const styles = theme => ({
     },
     content: {
         margin: '0 auto',
-        width: '70%',
+        width: '80%',
         [theme.breakpoints.down('md')]: {
             width: '90%',
         },

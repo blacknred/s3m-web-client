@@ -4,50 +4,42 @@ import { Link } from 'react-router-dom';
 
 import {
     Fab,
-    Chip,
-    List,
-    Input,
-    Avatar,
-    Toolbar,
-    ListItem,
+    Grid,
+    Radio,
+    Switch,
     withWidth,
+    RadioGroup,
     Typography,
-    ListItemText,
-    InputAdornment,
-    ListItemAvatar,
+    FormControlLabel,
 } from '@material-ui/core';
 import {
-    People,
     Cancel,
     Favorite,
     VideocamOff,
 } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
-const ENTER_KEY = 13;
-
 const styles = theme => ({
     root: {
-        flexGrow: 1,
-        display: 'flex',
         height: '100vh',
         overflow: 'hidden',
+        width: '100%',
+        margin: 0,
         [theme.breakpoints.only('xs')]: {
             flexDirection: 'column',
         },
     },
     options: {
-        flexBasis: '30%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        '&>div': {
+            height: '100%',
+            padding: theme.spacing.unit * 2,
+        },
         [theme.breakpoints.down('md')]: {
             zIndex: theme.zIndex.drawer,
             position: 'fixed',
             left: 0,
             top: 0,
-            bottom: '7%',
+            bottom: '5%',
         },
     },
     title: {
@@ -56,18 +48,23 @@ const styles = theme => ({
             color: theme.palette.grey[400],
         },
     },
+    actions: {
+        width: 'auto',
+        flexBasis: '25%',
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        [theme.breakpoints.down('md')]: {
+            flexDirection: 'row',
+        },
+    },
     preview: {
-        flexGrow: 1,
         backgroundColor: theme.palette.common.black,
     },
     chat: {
-        flexBasis: '30%',
-        display: 'flex',
-        flexDirection: 'column',
-        overflowY: 'auto',
-        padding: `${theme.spacing.unit}px ${theme.spacing.unit * 3}px`,
-        [theme.breakpoints.up('sm')]: {
-            alignItems: 'flex-end',
+        // overflowY: 'auto',
+        '&>div': {
+            height: '100%',
+            padding: theme.spacing.unit * 2,
         },
         [theme.breakpoints.only('xs')]: {
             zIndex: theme.zIndex.drawer,
@@ -75,210 +72,159 @@ const styles = theme => ({
             left: 0,
         },
     },
-    chatList: {
-        flexGrow: 1,
-        overflowY: 'auto',
-        display: 'flex',
-        overflowX: 'hidden',
-        flexDirection: 'column',
-        [theme.breakpoints.up('sm')]: {
-            alignItems: 'flex-end',
-        },
-        [theme.breakpoints.up('lg')]: {
-            width: '80%',
-        },
-        '&>li': {
-            width: 'auto',
-            maxWidth: '100%',
-            marginBottom: theme.spacing.unit,
-            backgroundColor: theme.palette.background.paper,
-        },
-    },
-    messageForm: {
-        height: 50,
-        borderRadius: 50,
-        minWidth: '80%',
-        backgroundColor: theme.palette.background.paper,
-    },
-    adornment: {
-        height: '100%',
-    },
-    chip: {
-        // margin: theme.spacing.unit,
+    stats: {
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        backgroundColor: 'rgba(34, 67, 423, 0.5)',
+        color: 'yellow',
+        padding: theme.spacing.unit * 2,
+        maxWidth: 300,
+        zIndex: theme.zIndex.tooltip,
     },
 });
 
-const ChatMessage = ({
-    avatar, author, message, event,
-}) => (
-    <ListItem
-        alignItems="flex-start"
-        dense
-        disabled={event}
-    >
-        {!event && (
-            <ListItemAvatar>
-                {
-                    avatar
-                        ? <Avatar src={avatar} />
-                        : (
-                            <Avatar>
-                                {author.charAt(0).toUpperCase()}
-                            </Avatar>
-                        )
-                }
-            </ListItemAvatar>
-        )}
-        <ListItemText
-            primary={author + message}
-            //secondary={}
-        />
-    </ListItem>
-);
-
 const Broadcast = ({
-    classes, width, text, messages, viewersCount, isMyStream, videoTarget,
-    onTextChange, onMessageSubmit, onLike, onStop,
+    classes, width, isMyStream, isStatsOn, videoCodec, Chat, NewMessage,
+    videoTarget, statsTarget, onChange, onLike, onStop, onSwitch,
 }) => {
-    const viewersCountWidget = (
-        <Chip
-            avatar={(
-                <Avatar>
-                    <People />
-                </Avatar>
-            )}
-            label={viewersCount}
-            className={classes.chip}
-        />
-    );
-
-    const newMessageForm = (
-        <Toolbar className={classes.messageForm}>
-            <Input
-                autoFocus
-                disableUnderline
-                fullWidth
-                id="new-message"
-                type="text"
-                name="text"
-                autoComplete="off"
-                value={text}
-                placeholder="new message"
-                onChange={onTextChange}
-                onKeyDown={
-                    e => e.keyCode === ENTER_KEY
-                        && onMessageSubmit()
-                }
-                startAdornment={(
-                    <InputAdornment
-                        position="start"
-                        className={classes.adornment}
-                    >
-                        <Avatar>A</Avatar>
-                    </InputAdornment>
-                )}
-                endAdornment={(
-                    <InputAdornment
-                        position="end"
-                        className={classes.adornment}
-                    >
-                        {!isMyStream && viewersCountWidget}
-                    </InputAdornment>
-                )}
-            />
-        </Toolbar>
-    );
-
-    const video = (
-        <video
-            controls
-            loop
-            ref={videoTarget}
-            className={classes.preview}
-        >
-            <track default kind="captions" src="" />
-        </video>
-    );
-
-    const chatList = (
-        <List className={classes.chatList}>
-            {messages.map(message => (
-                <ChatMessage
-                    {...message}
-                    key={`message-${message.id}`}
+    const stats = (
+        <div className={classes.stats}>
+            <p>
+                <small>
+                    Using WebRTC getStats API to detect data sent/received,
+                    packets lost/success, ports/network, encryption and more.
+                </small>
+            </p>
+            <RadioGroup
+                aria-label="position"
+                name="videoCodec"
+                value={videoCodec}
+                onChange={onChange}
+                row
+            >
+                <FormControlLabel
+                    value="VP8"
+                    control={<Radio color="primary" />}
+                    label="VP8"
+                    labelPlacement="end"
                 />
-            ))}
-        </List>
+                <FormControlLabel
+                    value="VP9"
+                    control={<Radio color="primary" />}
+                    label="VP9"
+                    labelPlacement="end"
+                />
+                <FormControlLabel
+                    value="H264"
+                    control={<Radio color="primary" />}
+                    label="H264"
+                    labelPlacement="end"
+                />
+            </RadioGroup>
+            <div ref={statsTarget} />
+        </div>
     );
 
     return (
-        <div className={classes.root}>
-            <div className={classes.options}>
-                <Toolbar>
+        <Grid container className={classes.root}>
+            {isStatsOn && stats}
+            <Grid item xs className={classes.options}>
+                <Grid
+                    container
+                    justify="space-between"
+                    alignItems="flex-start"
+                    direction="column"
+                >
                     <Typography
                         variant="h4"
                         color="textSecondary"
                         className={classes.title}
                         children={process.env.REACT_APP_WEBSITE_NAME.split('-')[0]}
                     />
-                </Toolbar>
-                {!isMyStream && (
-                    <Fab
-                        color="primary"
-                        size={width === 'xs' ? 'small' : 'large'}
-                        onClick={onLike}
+                    <Grid
+                        container
+                        direction="column"
+                        className={classes.actions}
                     >
-                        <Favorite />
-                    </Fab>
-                )}
-                <Toolbar>
-                    <Fab
-                        component={Link}
-                        to="/"
-                        color="secondary"
-                        size={width === 'xs' ? 'medium' : 'large'}
-                        variant={width === 'xs' ? 'round' : 'extended'}
-                        onClick={onStop}
-                    >
-                        {isMyStream ? <VideocamOff /> : <Cancel />}
-                        {width !== 'xs' && (
-                            <span>
-                                &nbsp;
-                                    {isMyStream ? 'Turn off' : 'Leave'}
-                            </span>
+                        {isMyStream && (
+                            <Fab
+                                color="primary"
+                                size={width === 'xs' ? 'medium' : 'large'}
+                                onClick={onLike}
+                            >
+                                <Favorite />
+                            </Fab>
                         )}
-                    </Fab>
-                </Toolbar>
-            </div>
-            {video}
-            <div className={classes.chat}>
-                {chatList}
-                {isMyStream && viewersCountWidget}
-                {!isMyStream && newMessageForm}
-            </div>
-        </div>
+                        <Fab
+                            to="/"
+                            component={Link}
+                            color="secondary"
+                            size={width === 'xs' ? 'medium' : 'large'}
+                            variant={width === 'xs' ? 'round' : 'extended'}
+                            onClick={onStop}
+                        >
+                            {isMyStream ? <VideocamOff /> : <Cancel />}
+                            {width !== 'xs' && (
+                                <span>
+                                    &nbsp;
+                                    {isMyStream ? 'Turn off' : 'Leave'}
+                                </span>
+                            )}
+                        </Fab>
+                        <FormControlLabel
+                            label="Peer statistics"
+                            control={(
+                                <Switch
+                                    checked={isStatsOn}
+                                    onChange={onSwitch('isStatsOn')}
+                                    // value="checkedA"
+                                />
+                            )}
+                        />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid item xs={12} lg={4} sm={6} className={classes.preview}>
+                <video
+                    controls
+                    loop
+                    ref={videoTarget}
+                    width="100%"
+                    height="100%"
+                >
+                    <track default kind="captions" src="" />
+                </video>
+            </Grid>
+            <Grid item xs className={classes.chat}>
+                <Grid
+                    container
+                    justify="space-between"
+                    alignItems="flex-end"
+                    direction="column"
+                >
+                    {Chat}
+                    {NewMessage}
+                </Grid>
+            </Grid>
+        </Grid>
     );
-};
-
-ChatMessage.propTypes = {
-    avatar: PropTypes.string,
-    author: PropTypes.string,
-    message: PropTypes.string.isRequired,
-    event: PropTypes.bool.isRequired,
 };
 
 Broadcast.propTypes = {
     width: PropTypes.string.isRequired,
     classes: PropTypes.objectOf(PropTypes.string).isRequired,
-    text: PropTypes.string.isRequired,
-    messages: PropTypes.arrayOf(PropTypes.shape()).isRequired,
-    viewersCount: PropTypes.number.isRequired,
+    videoCodec: PropTypes.string.isRequired,
     isMyStream: PropTypes.bool.isRequired,
+    isStatsOn: PropTypes.bool.isRequired,
     videoTarget: PropTypes.shape().isRequired,
-    onTextChange: PropTypes.func.isRequired,
-    onMessageSubmit: PropTypes.func.isRequired,
+    statsTarget: PropTypes.shape().isRequired,
+    onSwitch: PropTypes.func.isRequired,
     onLike: PropTypes.func.isRequired,
     onStop: PropTypes.func.isRequired,
+    onChange: PropTypes.func.isRequired,
+    Chat: PropTypes.node,
+    NewMessage: PropTypes.node.isRequired,
 };
 
 export default withWidth()(withStyles(styles)(Broadcast));
