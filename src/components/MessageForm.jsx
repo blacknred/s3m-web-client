@@ -16,13 +16,18 @@ const ENTER_KEY = 13;
 const styles = theme => ({
     messageForm: {
         borderRadius: 50,
-        minWidth: '75%',
+        minWidth: 300,
         backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.shadows[2],
+        padding: `0 ${theme.spacing.unit * 1}px`,
+        [theme.breakpoints.up('sm')]: {
+            minHeight: theme.spacing.unit * 7,
+            padding: `0 ${theme.spacing.unit * 2}px`,
+        },
     },
     adornment: {
         height: '100%',
     },
-    chip: {},
 });
 
 const MessageForm = ({
@@ -36,46 +41,47 @@ const MessageForm = ({
                 </Avatar>
             )}
             label={viewersCount}
-            className={classes.chip}
         />
     );
     return (
-        <Toolbar disableGutters>
-            {!isMyStream ? viewersCountWidget : (
-                <Toolbar className={classes.messageForm}>
-                    <Input
-                        autoFocus
-                        disableUnderline
-                        fullWidth
-                        id="new-message"
-                        type="text"
-                        name="text"
-                        autoComplete="off"
-                        value={text}
-                        placeholder="new message"
-                        onChange={onChange}
-                        onKeyDown={e => e.keyCode === ENTER_KEY && onSubmit()}
-                        startAdornment={(
-                            <InputAdornment
-                                position="start"
-                                className={classes.adornment}
-                            >
-                                <Avatar>A</Avatar>
-                            </InputAdornment>
-                        )}
-                        endAdornment={(
-                            <InputAdornment
-                                position="end"
-                                className={classes.adornment}
-                            >
-                                {viewersCountWidget}
-                            </InputAdornment>
-                        )}
-                    />
-                </Toolbar>
-            )}
-        </Toolbar>
-    );
+        !isMyStream ? viewersCountWidget : (
+            <Toolbar
+                variant="dense"
+                disableGutters
+                className={classes.messageForm}
+            >
+                <Input
+                    autoFocus
+                    disableUnderline
+                    fullWidth
+                    id="new-message"
+                    type="text"
+                    name="text"
+                    autoComplete="off"
+                    value={text}
+                    placeholder="new message"
+                    onChange={onChange}
+                    onKeyDown={e => e.keyCode === ENTER_KEY && onSubmit()}
+                    startAdornment={(
+                        <InputAdornment
+                            position="start"
+                            className={classes.adornment}
+                        >
+                            <Avatar>A</Avatar>
+                        </InputAdornment>
+                    )}
+                    endAdornment={(
+                        <InputAdornment
+                            position="end"
+                            className={classes.adornment}
+                        >
+                            {viewersCountWidget}
+                        </InputAdornment>
+                    )}
+                />
+
+            </Toolbar>
+        ));
 };
 
 MessageForm.propTypes = {

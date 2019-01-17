@@ -1,9 +1,9 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import MessageForm from '../components/MessageForm';
 
-class NewMessage extends PureComponent {
+class NewMessage extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {

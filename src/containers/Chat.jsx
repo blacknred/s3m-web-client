@@ -2,6 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import ChatList from '../components/ChatList';
+import { viewersUpdated } from '../signalingClient';
+
+const LIMIT = 3;
 
 const fakeMessages = [
     {
@@ -41,29 +44,51 @@ const fakeMessages = [
     },
 ];
 
-class Chat extends React.Component {
+class Chat extends React.PureComponent {
     constructor(props) {
         super(props);
+        this.viewersCount = 0; // fake counter
         this.state = {
             messages: [],
         };
     }
 
     componentDidMount() {
-        this.chatFetchingHandler();
+        // this.chatFetchingHandler();
 
         // fake fetching
-        setInterval(() => {
+        this.interval = setInterval(() => {
+            this.setState(({ messages }) => ({
+                messages: [
+                    ...(messages.length === LIMIT ? messages.splice(1) : messages),
+                    {
+                        ...fakeMessages[Math.floor(Math.random() * fakeMessages.length)],
+                        id: Date.now(),
+                    },
+                ],
+            }));
+        }, 3000);
+
+        viewersUpdated((event) => {
+            const less = event.numberOfBroadcastViewers < this.viewersCount;
             this.setState(({ messages }) => ({
                 messages: [
                     {
-                        ...messages[Math.floor(Math.random() * messages.length)],
                         id: messages.length + 1,
+                        avatar: null,
+                        author: null,
+                        message: less ? 'Viewer went' : 'New viewer came',
+                        event: true,
                     },
                     ...messages,
                 ],
             }));
-        }, 100000);
+            this.viewersCount = event.numberOfBroadcastViewers;
+        });
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     chatFetchingHandler = () => {

@@ -182,6 +182,7 @@ function handleStream(videoPreview) {
     if (!videoPreview) return;
 
     Connection.onstream = (event) => {
+        console.log('onstream');
         if (Connection.isInitiator && event.type !== 'local') {
             return;
         }
