@@ -1,12 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withWidth } from '@material-ui/core';
 
 import ChatList from '../components/ChatList';
 import { viewersUpdated } from '../signalingClient';
 
-const LIMIT = 3;
+const LIMITS = {
+    xs: 3,
+    sm: 6,
+    md: 12,
+    lg: 12,
+    xl: 15,
+};
 
-const fakeMessages = [
+const FAKE_MESSAGES = [
     {
         id: 1,
         avatar: null,
@@ -18,7 +25,7 @@ const fakeMessages = [
         id: 2,
         avatar: null,
         author: 'Van',
-        message: ', maxime alias temporibus aspernatur numquam',
+        message: 'maxime alias temporibus aspernatur numquam',
         event: false,
     },
     {
@@ -47,65 +54,69 @@ const fakeMessages = [
 class Chat extends React.PureComponent {
     constructor(props) {
         super(props);
-        this.viewersCount = 0; // fake counter
         this.state = {
             messages: [],
+            limit: 0,
+            viewersCount: 0, // fake counter
         };
     }
 
     componentDidMount() {
-        // this.chatFetchingHandler();
+        const { width } = this.props;
 
-        // fake fetching
-        this.interval = setInterval(() => {
-            this.setState(({ messages }) => ({
-                messages: [
-                    ...(messages.length === LIMIT ? messages.splice(1) : messages),
-                    {
-                        ...fakeMessages[Math.floor(Math.random() * fakeMessages.length)],
-                        id: Date.now(),
-                    },
-                ],
-            }));
-        }, 3000);
+        this.setState({ limit: LIMITS[width] });
 
         viewersUpdated((event) => {
-            const less = event.numberOfBroadcastViewers < this.viewersCount;
-            this.setState(({ messages }) => ({
-                messages: [
-                    {
-                        id: messages.length + 1,
-                        avatar: null,
-                        author: null,
-                        message: less ? 'Viewer went' : 'New viewer came',
-                        event: true,
-                    },
-                    ...messages,
-                ],
-            }));
-            this.viewersCount = event.numberOfBroadcastViewers;
+            const { viewersCount } = this.state;
+            this.setState({ viewersCount: event.numberOfBroadcastViewers });
+            const less = event.numberOfBroadcastViewers < viewersCount;
+            this.chatFetchingHandler({
+                avatar: null,
+                author: null,
+                event: true,
+                message: less ? 'The viewer is gone.' : 'New viewer has come.',
+            });
         });
+
+        // fake fetching
+        this.interval = setInterval(this.chatFetchingHandler, 3000);
     }
+
+    // shouldComponentUpdate({ width }) {
+    //     if (width) {
+    //         this.setState(({ messages }) => ({
+    //             limit: LIMITS[width],
+    //             messages: messages.splice(0, messages.length - LIMITS[width]),
+    //         }));
+    //     }
+    //     return false;
+    // }
 
     componentWillUnmount() {
         clearInterval(this.interval);
     }
 
-    chatFetchingHandler = () => {
-        const { broadcastId } = this.props;
-        if (broadcastId) {
-            this.setState({ messages: fakeMessages });
-        }
+    chatFetchingHandler = (message) => {
+        this.setState(({ messages, limit }) => ({
+            messages: [
+                ...(messages.length === limit ? messages.splice(1) : messages),
+                {
+                    ...FAKE_MESSAGES[Math.floor(Math.random() * FAKE_MESSAGES.length)],
+                    ...(message && message),
+                    id: Date.now(),
+                },
+            ],
+        }));
     }
 
     render() {
-        const { messages } = this.state;
-        return <ChatList messages={messages} />;
+        return <ChatList {...this.state} />;
     }
 }
 
 Chat.propTypes = {
-    broadcastId: PropTypes.string.isRequired,
+    broadcastId: PropTypes.string,
+    width: PropTypes.string.isRequired,
 };
 
-export default Chat;
+export default withWidth()(Chat);

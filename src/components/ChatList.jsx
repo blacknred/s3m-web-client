@@ -15,25 +15,26 @@ const styles = theme => ({
     chatList: {
         flex: 1,
         overflow: 'hidden',
-        flexWrap: 'nowrap',
-        maxHeight: '90%',
+        marginBottom: theme.spacing.unit * 3,
         [theme.breakpoints.up('sm')]: {
             alignItems: 'flex-end',
+        },
+        [theme.breakpoints.only('xs')]: {
+            alignItems: 'flex-start',
         },
         '&>li': {
             width: 'auto',
             maxWidth: '100%',
             marginBottom: theme.spacing.unit,
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
         },
     },
 });
 
-
 const ChatMessage = ({
     avatar, author, message, event,
 }) => (
-    <Zoom in unmountOnExit>
+    <Zoom in>
         <ListItem
             dense
             disabled={event}
@@ -71,7 +72,8 @@ const ChatList = ({ messages, classes }) => (
     <Grid
         container
         direction="column"
-        // wrap="nowrap"
+        justify="flex-end"
+        wrap="nowrap"
         className={classes.chatList}
     >
         {messages.map(message => (

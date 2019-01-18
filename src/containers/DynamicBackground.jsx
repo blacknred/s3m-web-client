@@ -4,7 +4,10 @@ import FastAverageColor from 'fast-average-color/dist/index.es6';
 
 const UPDATE_TIMEOUT = 700;
 const RGB_DEVIATION = 70;
-const DEFAULT_RGB = 'rgb(250, 250, 250)';
+const STYLE = {
+    backgroundColor: 'rgb(250, 250, 250)',
+    transition: 'background-color 0.1s linear',
+};
 const fac = new FastAverageColor();
 
 function reduceRgbUpdatesByDiff(firstArr = [], secondArr = [], epsilon) {
@@ -15,9 +18,10 @@ function reduceRgbUpdatesByDiff(firstArr = [], secondArr = [], epsilon) {
 class DynamicBackground extends React.PureComponent {
     constructor(props) {
         super(props);
-        this.rgbArr = [];
         this.state = {
-            rgb: DEFAULT_RGB,
+            rgb: null,
+            prevRgbArr: [],
+            isDark: false,
         };
     }
 
@@ -25,12 +29,12 @@ class DynamicBackground extends React.PureComponent {
         this.interval = setInterval(this.updateColor, UPDATE_TIMEOUT);
     }
 
-    componentWillReceiveProps({ on = true }) {
-        const { on: oldOn } = this.props;
-        if (on === oldOn) return;
-        if (!on) {
+    componentWillReceiveProps({ disable = false }) {
+        const { disable: prevDisable } = this.props;
+        if (disable === prevDisable) return;
+        if (disable) {
             clearInterval(this.interval);
-            this.setState({ rgb: DEFAULT_RGB });
+            this.setState({ rgb: STYLE.backgroundColor });
         } else {
             this.interval = setInterval(this.updateColor, UPDATE_TIMEOUT);
         }
@@ -42,13 +46,14 @@ class DynamicBackground extends React.PureComponent {
     }
 
     updateColor = () => {
-        const { src: { current: video } } = this.props;
+        const { src: { current: video }, onDarkCallback } = this.props;
+        const { prevRgbArr, isDark: oldIsDark } = this.state;
         if (!video) return;
-        const { rgb, value } = fac.getColor(video, {
+        const { rgb, value, isDark } = fac.getColor(video, {
             mode: 'speed', // precise, speed
             algorithm: 'sqrt', // simple, sqrt, dominant
         });
-        console.log('calc');
+        // console.log('calc');
         // v1
         // if (!rgb.match(new RegExp(this.rgbRegExp))) {
         //     this.setState({ color: rgb });
@@ -59,22 +64,20 @@ class DynamicBackground extends React.PureComponent {
         // }
 
         // v2
-        if (reduceRgbUpdatesByDiff(value, this.rgbArr)) {
-            this.setState({ rgb });
-            this.rgbArr = value;
-            console.log('upd');
+        if (reduceRgbUpdatesByDiff(value, prevRgbArr)) {
+            if (onDarkCallback && oldIsDark !== isDark) {
+                onDarkCallback(isDark);
+            }
+            this.setState({ rgb, prevRgbArr: value, isDark });
+            // console.log('upd');
         }
     }
 
     render() {
         const { children } = this.props;
         const { rgb } = this.state;
-        const style = {
-            backgroundColor: rgb,
-            transition: 'background-color 0.1s linear',
-        };
         return (
-            <div style={style}>
+            <div style={{ ...STYLE, backgroundColor: rgb }}>
                 {children}
             </div>
         );
@@ -84,7 +87,8 @@ class DynamicBackground extends React.PureComponent {
 DynamicBackground.propTypes = {
     src: PropTypes.shape().isRequired,
     children: PropTypes.node.isRequired,
-    on: PropTypes.bool,
+    disable: PropTypes.bool,
+    onDarkCallback: PropTypes.func,
 };
 
 export default DynamicBackground;

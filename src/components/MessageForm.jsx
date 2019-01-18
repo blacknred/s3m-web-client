@@ -31,7 +31,7 @@ const styles = theme => ({
 });
 
 const MessageForm = ({
-    classes, text, onChange, onSubmit, viewersCount, isMyStream,
+    classes, text, onChange, onSubmit, viewersCount, disable,
 }) => {
     const viewersCountWidget = (
         <Chip
@@ -44,7 +44,7 @@ const MessageForm = ({
         />
     );
     return (
-        !isMyStream ? viewersCountWidget : (
+        !disable ? viewersCountWidget : (
             <Toolbar
                 variant="dense"
                 disableGutters
@@ -90,7 +90,7 @@ MessageForm.propTypes = {
     onChange: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
     viewersCount: PropTypes.number.isRequired,
-    isMyStream: PropTypes.bool.isRequired,
+    disable: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles)(MessageForm);

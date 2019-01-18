@@ -171,11 +171,13 @@ const getOrSetBroadcast = (broadcastId, cb) => {
 };
 
 const viewersUpdated = (cb) => {
-    Connection.onNumberOfBroadcastViewersUpdated = (event) => {
-        // if (!Connection.isInitiator) return;
-        console.log(event);
-        cb(event);
-    };
+    // Connection.onNumberOfBroadcastViewersUpdated = (event) => {
+    //     // if (!Connection.isInitiator) return;
+    //     cb(event);
+    // };
+    Connection.getSocket((socket) => {
+        socket.on('number-of-broadcast-viewers-updated', event => cb(event));
+    });
 };
 
 function handleStream(videoPreview) {

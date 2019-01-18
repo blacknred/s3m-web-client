@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import HeartsBlock from '../components/HeartsBlock';
+import HeartsBlock from '../components/Hearts';
 
 class Hearts extends React.PureComponent {
     constructor(props) {

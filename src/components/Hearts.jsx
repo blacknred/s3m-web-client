@@ -27,7 +27,6 @@ const COLORS = {
 
 const styles = theme => ({
     root: {
-        maxWidth: 300,
         position: 'relative',
         [theme.breakpoints.up('sm')]: {
             flexGrow: 1,
@@ -140,7 +139,7 @@ const Heart = withStyles(styles)(({
     />
 ));
 
-const HeartsBlock = ({ classes, likes, onClick }) => (
+const Hearts = ({ classes, likes, onClick }) => (
     <Grid
         container
         justify="space-between"
@@ -167,10 +166,10 @@ const HeartsBlock = ({ classes, likes, onClick }) => (
     </Grid>
 );
 
-HeartsBlock.propTypes = {
+Hearts.propTypes = {
     classes: PropTypes.objectOf(PropTypes.string).isRequired,
     likes: PropTypes.arrayOf(PropTypes.shape()).isRequired,
     onClick: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(HeartsBlock);
+export default withStyles(styles)(Hearts);

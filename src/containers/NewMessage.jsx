@@ -3,12 +3,21 @@ import PropTypes from 'prop-types';
 
 import MessageForm from '../components/MessageForm';
 
+import { viewersUpdated } from '../signalingClient';
+
 class NewMessage extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {
             text: '',
+            viewersCount: 0,
         };
+    }
+
+    componentDidMount() {
+        viewersUpdated((event) => {
+            this.setState({ viewersCount: event.numberOfBroadcastViewers });
+        });
     }
 
     onChangeHandler = ({ target: { value } }) => {
@@ -22,12 +31,11 @@ class NewMessage extends React.PureComponent {
     }
 
     render() {
-        const { text } = this.state;
-        const { broadcastId, ...rest } = this.props;
+        const { disable = false } = this.props;
         return (
             <MessageForm
-                {...rest}
-                text={text}
+                {...this.state}
+                disable={disable}
                 onChange={this.onChangeHandler}
                 onSubmit={this.onSubmitHandler}
             />
@@ -37,8 +45,7 @@ class NewMessage extends React.PureComponent {
 
 NewMessage.propTypes = {
     broadcastId: PropTypes.string,
-    viewersCount: PropTypes.number.isRequired,
-    isMyStream: PropTypes.bool.isRequired,
+    disable: PropTypes.bool.isRequired,
 };
 
 export default NewMessage;

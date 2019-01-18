@@ -5,18 +5,13 @@ import { Link } from 'react-router-dom';
 import {
     Fab,
     Grid,
-    Menu,
-    Radio,
     MenuItem,
     withWidth,
-    RadioGroup,
     Typography,
-    FormControlLabel,
 } from '@material-ui/core';
 import {
     Cancel,
     VideocamOff,
-    MoreHoriz,
 } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -35,13 +30,6 @@ const styles = theme => ({
             bottom: 'auto',
             width: '100%',
         },
-        '&>div': {
-            height: '100%',
-            padding: theme.spacing.unit * 2,
-            [theme.breakpoints.only('xs')]: {
-                flexDirection: 'row',
-            },
-        },
         [theme.breakpoints.down('md')]: {
             zIndex: theme.zIndex.drawer,
             position: 'fixed',
@@ -49,13 +37,16 @@ const styles = theme => ({
             top: 0,
             bottom: 0,
         },
+        '&>div': {
+            height: '100%',
+            padding: theme.spacing.unit * 2,
+            [theme.breakpoints.only('xs')]: {
+                flexDirection: 'row',
+            },
+        },
     },
     title: {
         fontFamily: 'Dosis',
-        color: theme.palette.text.secondary,
-        [theme.breakpoints.down('md')]: {
-            color: theme.palette.primary.contrastText,
-        },
     },
     actions: {
         width: 'auto',
@@ -77,14 +68,13 @@ const styles = theme => ({
         backgroundColor: theme.palette.common.black,
     },
     right: {
-        // overflowY: 'auto',
         '&>div': {
             height: '100%',
             padding: theme.spacing.unit * 2,
             [theme.breakpoints.only('xs')]: {
                 width: 'auto',
                 flexWrap: 'nowrap',
-                alignItems: 'normal',
+                alignItems: 'flex-start',
             },
         },
         [theme.breakpoints.only('xs')]: {
@@ -92,184 +82,115 @@ const styles = theme => ({
             position: 'fixed',
             width: '100%',
             left: 0,
-            top: '65%',
+            top: '20%',
             bottom: 0,
             display: 'flex',
             justifyContent: 'space-between',
         },
     },
-    stats: {
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-        color: 'yellow',
-        padding: theme.spacing.unit * 2,
-        width: 200,
-        zIndex: theme.zIndex.tooltip,
-    },
 });
 
+// let textInput = React.createRef();
+
 const Broadcast = ({
-    classes, width, isMyStream, isPeerStatsOn, videoCodec, Chat, NewMessage,
-    Hearts, videoTarget, statsTarget, onChange, onStop, onSwitch,
-    isDynamicBackgroundOn, isChatOn, isMenuOpen,
-}) => {
-    const preview = (
-        <video
-            loop
-            controls={!['xs', 'sm'].includes(width)}
-            ref={videoTarget}
-            width="100%"
-            height="100%"
-        >
-            <track default kind="captions" src="" />
-        </video>
-    );
-
-    const stats = (
-        <div className={classes.stats}>
-            <RadioGroup
-                aria-label="position"
-                name="videoCodec"
-                value={videoCodec}
-                onChange={onChange}
-                // row
+    classes, width, isMyStream, isPeerStatsOn, isDynamicBackgroundOn,
+    isChatOn, Chat, NewMessage, Hearts, Preview, OptionsMenu,
+    PeerStats, onStop, onSwitch,
+}) => (
+    <Grid container className={classes.root}>
+        {isPeerStatsOn && PeerStats}
+        <Grid item xs className={classes.left}>
+            <Grid
+                container
+                justify="space-between"
+                alignItems="flex-start"
+                direction="column"
             >
-                <FormControlLabel
-                    value="VP8"
-                    control={<Radio color="primary" />}
-                    label="VP8"
-                    labelPlacement="end"
+                <Typography
+                    variant="h4"
+                    color="textSecondary"
+                    className={classes.title}
+                    style={{ ...(isDynamicBackgroundOn && { color: '#ffffff7a' }) }}
+                    children={process.env.REACT_APP_WEBSITE_NAME.split('-')[0]}
                 />
-                <FormControlLabel
-                    value="VP9"
-                    control={<Radio color="primary" />}
-                    label="VP9"
-                    labelPlacement="end"
-                />
-                <FormControlLabel
-                    value="H264"
-                    control={<Radio color="primary" />}
-                    label="H264"
-                    labelPlacement="end"
-                />
-            </RadioGroup>
-            <div ref={statsTarget} />
-        </div>
-    );
-
-    const optionsMenu = (
-        <Menu
-            id="opts-menu"
-            anchorEl={document.getElementById('menu-anchor')}
-            open={isMenuOpen}
-            onClose={onSwitch('isMenuOpen')}
-            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-            <MenuItem onClick={onSwitch('isChatOn')}>
-                {`Chat ${isChatOn ? 'off' : 'on'}`}
-            </MenuItem>
-            <MenuItem onClick={onSwitch('isDynamicBackgroundOn')}>
-                {`Dynamic background ${isDynamicBackgroundOn ? 'off' : 'on'}`}
-            </MenuItem>
-            <MenuItem onClick={onSwitch('isPeerStatsOn')}>
-                {`Peer statistic ${isPeerStatsOn ? 'off' : 'on'}`}
-            </MenuItem>
-        </Menu>
-    );
-
-    return (
-        <Grid container className={classes.root}>
-            {isPeerStatsOn && stats}
-            <Grid item xs className={classes.left}>
                 <Grid
                     container
-                    justify="space-between"
-                    alignItems="flex-start"
                     direction="column"
+                    className={classes.actions}
                 >
-                    <Typography
-                        variant="h4"
-                        color="textSecondary"
-                        className={classes.title}
-                        children={process.env.REACT_APP_WEBSITE_NAME.split('-')[0]}
-                    />
-                    <Grid
-                        container
-                        direction="column"
-                        className={classes.actions}
+                    {isMyStream && width !== 'xs' && Hearts}
+                    <OptionsMenu>
+                        <MenuItem
+                            onClick={() => {
+                                onSwitch('isChatOn')();
+                                console.log(this);
+                            }}
+                        >
+                            {`Chat ${isChatOn ? 'off' : 'on'}`}
+                        </MenuItem>
+                        <MenuItem onClick={onSwitch('isDynamicBackgroundOn')}>
+                            {`Dynamic background ${isDynamicBackgroundOn ? 'off' : 'on'}`}
+                        </MenuItem>
+                        <MenuItem onClick={onSwitch('isPeerStatsOn')}>
+                            {`Peer statistic ${isPeerStatsOn ? 'off' : 'on'}`}
+                        </MenuItem>
+                    </OptionsMenu>
+                    <Fab
+                        to="/"
+                        component={Link}
+                        color="secondary"
+                        size={width === 'xs' ? 'small' : 'large'}
+                        variant={width === 'xs' ? 'round' : 'extended'}
+                        onClick={onStop}
                     >
-                        {isMyStream && width !== 'xs' && Hearts}
-                        <Fab
-                            id="menu-anchor"
-                            color="inherit"
-                            size={width === 'xs' ? 'small' : 'medium'}
-                            onClick={onSwitch('isMenuOpen')}
-                        >
-                            <MoreHoriz />
-                        </Fab>
-                        {optionsMenu}
-                        <Fab
-                            to="/"
-                            component={Link}
-                            color="secondary"
-                            size={width === 'xs' ? 'small' : 'large'}
-                            variant={width === 'xs' ? 'round' : 'extended'}
-                            onClick={onStop}
-                        >
-                            {isMyStream ? <VideocamOff /> : <Cancel />}
-                            {width !== 'xs' && (
-                                <span>
-                                    &nbsp;
-                                    {isMyStream ? 'Turn off' : 'Leave'}
-                                </span>
-                            )}
-                        </Fab>
-                    </Grid>
+                        {isMyStream ? <VideocamOff /> : <Cancel />}
+                        {width !== 'xs' && (
+                            <span>
+                                &nbsp;
+                                {isMyStream ? 'Turn off' : 'Leave'}
+                            </span>
+                        )}
+                    </Fab>
                 </Grid>
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6} className={classes.preview}>
-                {preview}
-            </Grid>
-            <Grid item xs className={classes.right}>
-                <Grid
-                    container
-                    justify="space-between"
-                    alignItems="flex-end"
-                    direction="column"
-                >
-                    {isChatOn && (
-                        <React.Fragment>
-                            {Chat}
-                            {NewMessage}
-                        </React.Fragment>
-                    )}
-                </Grid>
-                {isMyStream && width === 'xs' && Hearts}
             </Grid>
         </Grid>
-    );
-};
+        <Grid item xs={12} lg={4} sm={6} className={classes.preview}>
+            {Preview}
+        </Grid>
+        <Grid item xs className={classes.right}>
+            <Grid
+                container
+                justify="space-between"
+                alignItems="flex-end"
+                direction="column"
+            >
+                {isChatOn && (
+                    <React.Fragment>
+                        {Chat}
+                        {NewMessage}
+                    </React.Fragment>
+                )}
+            </Grid>
+            {isMyStream && width === 'xs' && Hearts}
+        </Grid>
+    </Grid>
+);
 
 Broadcast.propTypes = {
     width: PropTypes.string.isRequired,
     classes: PropTypes.objectOf(PropTypes.string).isRequired,
-    videoCodec: PropTypes.string.isRequired,
     isMyStream: PropTypes.bool.isRequired,
     isPeerStatsOn: PropTypes.bool.isRequired,
     isChatOn: PropTypes.bool.isRequired,
-    isMenuOpen: PropTypes.bool.isRequired,
     isDynamicBackgroundOn: PropTypes.bool.isRequired,
-    videoTarget: PropTypes.shape().isRequired,
-    statsTarget: PropTypes.shape().isRequired,
     onSwitch: PropTypes.func.isRequired,
     onStop: PropTypes.func.isRequired,
-    onChange: PropTypes.func.isRequired,
     Chat: PropTypes.node,
     Hearts: PropTypes.node.isRequired,
+    PeerStats: PropTypes.node.isRequired,
+    Preview: PropTypes.node.isRequired,
     NewMessage: PropTypes.node.isRequired,
+    OptionsMenu: PropTypes.func.isRequired,
 };
 
 export default withWidth()(withStyles(styles)(Broadcast));
