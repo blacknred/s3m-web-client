@@ -93,9 +93,9 @@ const styles = theme => ({
 // let textInput = React.createRef();
 
 const Broadcast = ({
-    classes, width, isMyStream, isPeerStatsOn, isDynamicBackgroundOn,
-    isChatOn, Chat, NewMessage, Hearts, Preview, OptionsMenu,
-    PeerStats, onStop, onSwitch,
+    classes, width, isMyStream, onStop, onSwitch,
+    isPeerStatsOn, isDynamicBackgroundOn, isChatOn, isFakeChatModeOn,
+    Chat, NewMessage, Hearts, Preview, OptionsMenu, PeerStats,
 }) => (
     <Grid container className={classes.root}>
         {isPeerStatsOn && PeerStats}
@@ -118,15 +118,13 @@ const Broadcast = ({
                     direction="column"
                     className={classes.actions}
                 >
-                    {isMyStream && width !== 'xs' && Hearts}
+                    {width !== 'xs' && Hearts}
                     <OptionsMenu>
-                        <MenuItem
-                            onClick={() => {
-                                onSwitch('isChatOn')();
-                                console.log(this);
-                            }}
-                        >
+                        <MenuItem onClick={onSwitch('isChatOn')}>
                             {`Chat ${isChatOn ? 'off' : 'on'}`}
+                        </MenuItem>
+                        <MenuItem onClick={onSwitch('isFakeChatModeOn')}>
+                            {`Fake chat mode ${isFakeChatModeOn ? 'off' : 'on'}`}
                         </MenuItem>
                         <MenuItem onClick={onSwitch('isDynamicBackgroundOn')}>
                             {`Dynamic background ${isDynamicBackgroundOn ? 'off' : 'on'}`}
@@ -164,14 +162,10 @@ const Broadcast = ({
                 alignItems="flex-end"
                 direction="column"
             >
-                {isChatOn && (
-                    <React.Fragment>
-                        {Chat}
-                        {NewMessage}
-                    </React.Fragment>
-                )}
+                {Chat}
+                {NewMessage}
             </Grid>
-            {isMyStream && width === 'xs' && Hearts}
+            {width === 'xs' && Hearts}
         </Grid>
     </Grid>
 );
@@ -182,10 +176,11 @@ Broadcast.propTypes = {
     isMyStream: PropTypes.bool.isRequired,
     isPeerStatsOn: PropTypes.bool.isRequired,
     isChatOn: PropTypes.bool.isRequired,
+    isFakeChatModeOn: PropTypes.bool.isRequired,
     isDynamicBackgroundOn: PropTypes.bool.isRequired,
     onSwitch: PropTypes.func.isRequired,
     onStop: PropTypes.func.isRequired,
-    Chat: PropTypes.node,
+    Chat: PropTypes.node.isRequired,
     Hearts: PropTypes.node.isRequired,
     PeerStats: PropTypes.node.isRequired,
     Preview: PropTypes.node.isRequired,

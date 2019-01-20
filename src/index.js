@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom';
 import { CssBaseline } from '@material-ui/core';
 
+import Loader from './components/Loader';
 import ErrorBoundary from './ErrorBoundary';
 import { setConnection } from './signalingClient';
 import registerServiceWorker from './registerServiceWorker';
@@ -19,7 +20,7 @@ const App = () => (
         <CssBaseline />
         <ErrorBoundary>
             <BrowserRouter>
-                <Suspense fallback="Loading...">
+                <Suspense fallback={<Loader />}>
                     <Switch>
                         <Route path="/" exact render={props => <Home {...props} />} />
                         <Route path="/stream/:broadcastId?" exact component={props => <Broadcast {...props} />} />

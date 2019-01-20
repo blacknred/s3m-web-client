@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withWidth } from '@material-ui/core';
 
 import { handleStream } from '../signalingClient';
 
@@ -11,11 +10,12 @@ class Preview extends React.PureComponent {
     }
 
     render() {
-        const { width, videoRef } = this.props;
+        const { videoRef } = this.props;
         return (
             <video
+                autoPlay
                 loop
-                controls={!['xs', 'sm'].includes(width)}
+                // controls={!['xs', 'sm'].includes(width)}
                 ref={videoRef}
                 width="100%"
                 height="100%"
@@ -27,8 +27,7 @@ class Preview extends React.PureComponent {
 }
 
 Preview.propTypes = {
-    width: PropTypes.string.isRequired,
     videoRef: PropTypes.shape().isRequired,
 };
 
-export default withWidth()(Preview);
+export default Preview;

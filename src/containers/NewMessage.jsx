@@ -31,11 +31,11 @@ class NewMessage extends React.PureComponent {
     }
 
     render() {
-        const { disable = false } = this.props;
+        const { isDisable = false } = this.props;
         return (
             <MessageForm
                 {...this.state}
-                disable={disable}
+                isDisable={isDisable}
                 onChange={this.onChangeHandler}
                 onSubmit={this.onSubmitHandler}
             />
@@ -45,7 +45,7 @@ class NewMessage extends React.PureComponent {
 
 NewMessage.propTypes = {
     broadcastId: PropTypes.string,
-    disable: PropTypes.bool.isRequired,
+    isDisable: PropTypes.bool.isRequired,
 };
 
 export default NewMessage;

@@ -11,15 +11,8 @@ class OptionsMenu extends React.PureComponent {
         };
     }
 
-    componentDidMount() {
-        const { children } = this.props;
-        [...children].forEach((o) => {
-            o.props.onClick.prototype.onClose = this.onCloseHandler;
-        });
-    }
-
-    onCloseHandler = () => {
-        this.setState(({ isOpen }) => ({ isOpen: !isOpen }));
+    onCloseHandler = (_, status) => {
+        this.setState(({ isOpen }) => ({ isOpen: status || !isOpen }));
     }
 
     render() {

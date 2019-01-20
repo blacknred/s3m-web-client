@@ -139,7 +139,9 @@ const Heart = withStyles(styles)(({
     />
 ));
 
-const Hearts = ({ classes, likes, onClick }) => (
+const Hearts = ({
+    classes, likes, onClick, isDisable,
+}) => (
     <Grid
         container
         justify="space-between"
@@ -151,18 +153,20 @@ const Hearts = ({ classes, likes, onClick }) => (
                 <Heart key={id} {...rest} />
             ))}
         </div>
-        <Fab
-            color="primary"
-            size="medium"
-            onClick={onClick}
-            onDoubleClick={() => {
-                onClick();
-                onClick();
-                onClick();
-            }}
-        >
-            <Favorite />
-        </Fab>
+        {!isDisable && (
+            <Fab
+                color="primary"
+                size="medium"
+                onClick={onClick}
+                onDoubleClick={() => {
+                    onClick();
+                    onClick();
+                    onClick();
+                }}
+            >
+                <Favorite />
+            </Fab>
+        )}
     </Grid>
 );
 
@@ -170,6 +174,7 @@ Hearts.propTypes = {
     classes: PropTypes.objectOf(PropTypes.string).isRequired,
     likes: PropTypes.arrayOf(PropTypes.shape()).isRequired,
     onClick: PropTypes.func.isRequired,
+    isDisable: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles)(Hearts);

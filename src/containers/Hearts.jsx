@@ -19,17 +19,23 @@ class Hearts extends React.PureComponent {
             f: Math.floor((Math.random() * 3)),
             s: Math.floor(Math.random() * (55 - 30 + 1) + 30),
         };
-        this.setState(({ likes }) => ({ likes: [...likes, newLike] }));
+        this.setState(({ likes }) => ({
+            likes: [...likes, newLike],
+        }));
         setTimeout(() => {
-            this.setState(({ likes }) => ({ likes: likes.slice(1) }));
+            this.setState(({ likes }) => ({
+                likes: likes.slice(1),
+            }));
         }, 900);
     }
 
 
     render() {
+        const { isDisable = false } = this.props;
         return (
             <HeartsBlock
                 {...this.state}
+                isDisable={isDisable}
                 onClick={this.onClickHandler}
             />
         );
@@ -37,7 +43,8 @@ class Hearts extends React.PureComponent {
 }
 
 Hearts.propTypes = {
-    broadcastId: PropTypes.string,
+    broadcastId: PropTypes.string.isRequired,
+    isDisable: PropTypes.bool.isRequired,
 };
 
 export default Hearts;

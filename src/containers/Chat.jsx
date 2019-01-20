@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withWidth } from '@material-ui/core';
 
 import ChatList from '../components/ChatList';
 import { viewersUpdated } from '../signalingClient';
@@ -56,48 +55,60 @@ class Chat extends React.PureComponent {
         super(props);
         this.state = {
             messages: [],
-            limit: 0,
-            viewersCount: 0, // fake counter
+            limit: null,
+            viewersCount: 0, // fake implementation
         };
     }
 
     componentDidMount() {
-        const { width } = this.props;
-
-        this.setState({ limit: LIMITS[width] });
+        const { isFake } = this.props;
 
         viewersUpdated((event) => {
             const { viewersCount } = this.state;
             this.setState({ viewersCount: event.numberOfBroadcastViewers });
-            const less = event.numberOfBroadcastViewers < viewersCount;
-            this.chatFetchingHandler({
+            this.chatFakeFetchingHandler({
                 avatar: null,
                 author: null,
                 event: true,
-                message: less ? 'The viewer is gone.' : 'New viewer has come.',
+                message: event.numberOfBroadcastViewers < viewersCount
+                    ? `The viewer ${event.targetUser} is gone`
+                    : `New viewer ${event.targetUser} has come.`,
             });
         });
 
-        // fake fetching
-        this.interval = setInterval(this.chatFetchingHandler, 3000);
+        if (isFake) {
+            this.interval = setInterval(this.chatFakeFetchingHandler, 3000);
+        }
     }
 
-    // shouldComponentUpdate({ width }) {
-    //     if (width) {
+    // shouldComponentUpdate({ width: nextWidth }) {
+    //     const { width } = this.props;
+    //     if (width !== nextWidth) {
     //         this.setState(({ messages }) => ({
-    //             limit: LIMITS[width],
-    //             messages: messages.splice(0, messages.length - LIMITS[width]),
+    //             messages: messages.splice(0, messages.length - LIMITS[nextWidth]),
     //         }));
     //     }
-    //     return false;
+    //     return true;
     // }
+
+    componentDidUpdate({ isFake: prevIsFake }) {
+        const { isFake } = this.props;
+        if (isFake !== prevIsFake) {
+            if (isFake) {
+                this.interval = setInterval(this.chatFakeFetchingHandler, 3000);
+            } else {
+                clearInterval(this.interval);
+            }
+        }
+    }
 
     componentWillUnmount() {
         clearInterval(this.interval);
     }
 
-    chatFetchingHandler = (message) => {
-        this.setState(({ messages, limit }) => ({
+    chatFakeFetchingHandler = (message) => {
+        const { limit } = this.state;
+        this.setState(({ messages }) => ({
             messages: [
                 ...(messages.length === limit ? messages.splice(1) : messages),
                 {
@@ -109,14 +120,29 @@ class Chat extends React.PureComponent {
         }));
     }
 
+    onSetLimitHandler = (width) => {
+        const { limit, messages } = this.state;
+        if (limit !== LIMITS[width]) {
+            this.setState({
+                limit: LIMITS[width],
+                messages: messages.splice(0, messages.length - LIMITS[width]),
+            });
+        }
+    }
+
     render() {
-        return <ChatList {...this.state} />;
+        return (
+            <ChatList
+                {...this.state}
+                setLimit={this.onSetLimitHandler}
+            />
+        );
     }
 }
 
 Chat.propTypes = {
     broadcastId: PropTypes.string,
-    width: PropTypes.string.isRequired,
+    isFake: PropTypes.bool,
 };
 
-export default withWidth()(Chat);
+export default Chat;

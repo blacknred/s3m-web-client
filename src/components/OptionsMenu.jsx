@@ -8,6 +8,11 @@ import {
 } from '@material-ui/core';
 import { MoreHoriz } from '@material-ui/icons';
 
+const ANCHOR_ORIGIN = {
+    vertical: 'top',
+    horizontal: 'right',
+};
+
 const OptionsMenu = ({
     width, isOpen, children, onClose,
 }) => (
@@ -24,10 +29,10 @@ const OptionsMenu = ({
             id="opts-menu"
             anchorEl={document.getElementById('menu-anchor')}
             open={isOpen}
-            // onClick={() => onClose()}
             onClose={onClose}
-            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            onClick={e => onClose(e, false)}
+            anchorOrigin={ANCHOR_ORIGIN}
+            transformOrigin={ANCHOR_ORIGIN}
         >
             {children}
         </Menu>

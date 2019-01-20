@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 const Connection = new window.RTCMultiConnection();
+window.enableAdapter = true; // enable adapter.js
 const enableRecordings = false;
 const allRecordedBlobs = [];
 
@@ -70,14 +71,31 @@ const setConnection = async () => {
     // we don't need to keep room-opened
     // scalable-broadcast.js will handle stuff itself.
     Connection.autoCloseEntireSession = true;
-    Connection.socketURL = process.env.REACT_APP_SIGNALING_HOST; // socket.io server
     Connection.socketMessageEvent = 'scalable-media-broadcast-demo';
+    Connection.socketURL = process.env.REACT_APP_SIGNALING_HOST; // socket.io server
+    
     /*
     recording is disabled because it is resulting for browser-crash
     if you enable below line, please also uncomment above "RecordRTC.js"
     */
 
     console.log(Connection.codecs.video);
+
+    // custom event
+    // Connection.socketCustomEvent = Connection.channel;
+    // socket.on(Connection.socketCustomEvent, (message) => {
+    //     alert(message.sender + ' shared custom message:\n\n' + message.customMessage);
+    // });
+    // document.getElementById('send-custom-message').onclick = () => {
+    // const customMessage = window.prompt('Enter test message.');
+    // socket.emit(Connection.socketCustomEvent, {
+    //     sender: Connection.userid,
+    //     customMessage,
+    // });
+    // };
+
+    // canvas.toDataURL('image/webp');
+
     Connection.connectSocket((socket) => {
         // log status
         socket.on('logs', (log) => {
@@ -85,6 +103,8 @@ const setConnection = async () => {
         });
     });
 };
+
+
 
 const getOrSetBroadcast = (broadcastId, cb) => {
     if (!broadcastId || broadcastId.replace(/^\s+|\s+$/g, '').length <= 0) {
@@ -95,12 +115,13 @@ const getOrSetBroadcast = (broadcastId, cb) => {
         audio: true,
         video: true,
         oneway: true,
+        data: true,
     };
-    const codec = localStorage.getItem('videoCodec');
-    if (codec) {
-        Connection.codecs.video = codec;
-        console.log(Connection.codecs.video);
-    }
+    // const codec = localStorage.getItem('videoCodec');
+    // if (codec) {
+    //     Connection.codecs.video = codec;
+    //     console.log(Connection.codecs.video);
+    // }
     Connection.getSocket((socket) => {
         socket.emit('check-broadcast-presence', broadcastId, (isBroadcastExists) => {
             console.log('check-broadcast-presence', broadcastId, isBroadcastExists);
@@ -110,15 +131,15 @@ const getOrSetBroadcast = (broadcastId, cb) => {
                 Connection.userid = broadcastId;
             }
             // join broadcast
-            socket.emit('join-broadcast', {
-                broadcastId,
-                userid: Connection.userid,
-                typeOfStreams: Connection.session,
-            });
-            cb(broadcastId, isBroadcastExists);
+            setTimeout(() => {
+                socket.emit('join-broadcast', {
+                    broadcastId,
+                    userid: Connection.userid,
+                    typeOfStreams: Connection.session,
+                });
+                cb(broadcastId, isBroadcastExists);
+            }, 500);
         });
-
-
 
         // when a broadcast is absent
         socket.on('start-broadcasting', (typeOfStreams) => {
@@ -176,6 +197,9 @@ const viewersUpdated = (cb) => {
     //     cb(event);
     // };
     Connection.getSocket((socket) => {
+        // if (!Connection.isInitiator) {
+        //     return;
+        // }
         socket.on('number-of-broadcast-viewers-updated', event => cb(event));
     });
 };

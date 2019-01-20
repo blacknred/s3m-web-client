@@ -3,91 +3,54 @@ import PropTypes from 'prop-types';
 
 import {
     Grid,
-    Zoom,
-    Avatar,
-    ListItem,
-    ListItemText,
-    ListItemAvatar,
+    withWidth,
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
+import Message from './ChatItem';
+
 const styles = theme => ({
-    chatList: {
+    root: {
         flex: 1,
         overflow: 'hidden',
         marginBottom: theme.spacing.unit * 3,
-        [theme.breakpoints.up('sm')]: {
+        [theme.breakpoints.up('md')]: {
             alignItems: 'flex-end',
+            maxWidth: '90%',
         },
         [theme.breakpoints.only('xs')]: {
             alignItems: 'flex-start',
         },
-        '&>li': {
-            width: 'auto',
-            maxWidth: '100%',
-            marginBottom: theme.spacing.unit,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-        },
     },
 });
 
-const ChatMessage = ({
-    avatar, author, message, event,
-}) => (
-    <Zoom in>
-        <ListItem
-            dense
-            disabled={event}
-            alignItems="flex-start"
+const ChatList = ({
+    messages, classes, width, setLimit,
+}) => {
+    setLimit(width);
+    return (
+        <Grid
+            container
+            direction="column"
+            justify="flex-end"
+            wrap="nowrap"
+            className={classes.root}
         >
-            {!event && (
-                <ListItemAvatar>
-                    {
-                        avatar
-                            ? <Avatar src={avatar} />
-                            : (
-                                <Avatar>
-                                    {author.charAt(0).toUpperCase()}
-                                </Avatar>
-                            )
-                    }
-                </ListItemAvatar>
-            )}
-            <ListItemText
-                primary={message}
-                secondary={!event ? author : null}
-            />
-        </ListItem>
-    </Zoom>
-);
-
-ChatMessage.propTypes = {
-    avatar: PropTypes.string,
-    author: PropTypes.string,
-    message: PropTypes.string.isRequired,
-    event: PropTypes.bool.isRequired,
+            {messages.map(message => (
+                <Message
+                    {...message}
+                    key={`message-${message.id}`}
+                />
+            ))}
+        </Grid>
+    );
 };
-
-const ChatList = ({ messages, classes }) => (
-    <Grid
-        container
-        direction="column"
-        justify="flex-end"
-        wrap="nowrap"
-        className={classes.chatList}
-    >
-        {messages.map(message => (
-            <ChatMessage
-                {...message}
-                key={`message-${message.id}`}
-            />
-        ))}
-    </Grid>
-);
 
 ChatList.propTypes = {
     messages: PropTypes.arrayOf(PropTypes.shape()).isRequired,
     classes: PropTypes.objectOf(PropTypes.string).isRequired,
+    width: PropTypes.string.isRequired,
+    setLimit: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(ChatList);
+export default withStyles(styles)(withWidth()(ChatList));
